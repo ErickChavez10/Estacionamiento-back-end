@@ -30,6 +30,7 @@ const DATA = [
   {Piso: 1, Zona: "A", Posicion: 20, sel: false},
   {Piso: 1, Zona: "A", Posicion: 21, sel: false}
 ];
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -39,6 +40,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/list", (req, res) => {
+  console.log("LISTUKI",port)
   res.send(DATA);
 });
 // app.post("/addUser", (req, res) => {
@@ -83,7 +85,6 @@ io.on("connection", (socket) => {
 
 // app.use(require('./routes/lista'));
 
-const port = process.env.PORT || 3000;
 http.listen(port, () => {
   console.log(`Socket.IO server running at http://localhost:${port}/`);
 });
