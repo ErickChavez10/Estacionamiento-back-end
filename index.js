@@ -1,4 +1,3 @@
-const DATA = require('./data')
 const express = require("express");
 const app = express();
 const http = require("http").Server(app);
@@ -8,6 +7,29 @@ const io = require("socket.io")(http, {
     origin: "*",
   },
 });
+const DATA = [
+  {Piso: 1, Zona: "A", Posicion: 1, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 2, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 3, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 4, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 5, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 6, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 7, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 8, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 9, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 10, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 11, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 12, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 13, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 14, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 15, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 16, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 17, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 18, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 19, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 20, sel: false},
+  {Piso: 1, Zona: "A", Posicion: 21, sel: false}
+];
 
 app.use(cors());
 app.use(express.json());
