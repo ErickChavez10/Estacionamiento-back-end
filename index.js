@@ -2,11 +2,16 @@ const express = require("express");
 const app = express();
 const http = require("http").Server(app);
 const cors = require("cors");
+const db = require('./config/db')
+const User = require('./models/user');
+const bcrypt = require('bcryptjs');
+const crearToken = require('./methods/token')
 const io = require("socket.io")(http, {
   cors: {
     origin: "*",
   },
 });
+db;
 const DATA = [
   {Piso: 1, Zona: "A", Posicion: 1, sel: false},
   {Piso: 1, Zona: "A", Posicion: 2, sel: false},
@@ -40,27 +45,104 @@ app.get("/", (req, res) => {
 });
 
 app.get("/list", (req, res) => {
-  console.log("LISTUKI",port)
   res.send(DATA);
 });
-// app.post("/addUser", (req, res) => {
-//   if (req.body) {
-//     const {name, auto, email, password, password_confirm} = req.body;
-//     if (name && auto && email && password && password_confirm) {
-//       if (password == password_confirm) {
-//         //TODO BIEN
-//       } else {
-//         return {
-//           res: "NO_COINCIDEN"
-//         }
-//       }
-//     } else {
-//       return {
-//         res: "LLENAR_CAMPOS"
-//       }
-//     }
-//   }
-// });
+
+
+
+app.get("/users", async (req, res) => {
+  const n = await User.find();
+  res.send(n);
+});
+
+app.post("/addUser", async (req, res) => {
+  if (req.body) {
+    const {name, auto, email, password, password_confirm} = req.body;
+    const user = await User.findOne({email: email});
+    if (user) {
+      // EL EMAIL YA EXISTE
+      res.send({
+        res: {
+          status: 'error',
+          msg: 'user_exist'
+        }
+      })
+    } else {
+      // EL EMAIL NO EXISTE
+      if (name && auto && email && password && password_confirm) {
+        if (password == password_confirm) {
+          //TODO BIEN
+          // Crea nuevo usuario
+          const newUser = new User(req.body);
+          // Encripta la contraseña
+          const hash = await bcrypt.hash(password, 10);
+          // Le asigna la contraseña encriptada al usuario
+          newUser.password = hash;
+
+          console.log('registrado')
+          res.send({
+            res: {
+              status: 'success',
+            },
+            user: await newUser.save(),
+            token: crearToken(user, 'Secreta', '168hr')
+          })
+        } else {
+          // MALAS CONTRASEÑAS
+          console.log('no coinciden')
+          res.send({
+            res: {
+              status: 'error',
+              msg: "no_match"
+            }
+          })
+        }
+      } else {
+        // CAMPOS VACIOS
+        console.log('campos vacios')
+        res.send({
+          res: {
+            status: "error",
+            msg: 'empty_fields'
+          }
+        })
+      }
+    }
+  }
+});
+
+
+app.post("/login", async (req, res) => {
+  console.log(req.body);
+  const {email, password} = req.body;
+  const user = await User.findOne({email})
+  if (user) {
+    const compare_pass = await bcrypt.compare(password, user.password);
+    if (compare_pass) {
+      res.send({
+        res: {
+          status: 'success',
+          token: crearToken(user, 'Secreta', '168hr'),
+          user: user,
+        }
+      })
+    } else {
+      res.send({
+        res: {
+          status: 'error',
+          msg: 'password_not_match'
+        }
+      })
+    }
+  } else {
+    res.send({
+      res: {
+        status: 'error',
+        msg: 'email_not_match'
+      }
+    })
+  }
+})
 
 
 io.on("connection", (socket) => {
