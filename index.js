@@ -147,7 +147,6 @@ app.post("/login", async (req, res) => {
 })
 
 io.on("connection", (socket) => {
-  console.log("ALGUIEN SE CONECTÓ");
 
   socket.on("chat message", (msg) => {
     io.emit("chat message", msg);
@@ -163,10 +162,6 @@ io.on("connection", (socket) => {
         if (elem.Posicion == posicion && elem.Zona == zona && elem.Piso == piso) {
           disponible = true;
           ocupado = null;
-          console.log("[Mismo Lugar]",);
-          console.log("[Posicion]", elem.Posicion, posicion)
-          console.log("[Zona]", elem.Zona, zona)
-          console.log("[Piso]", elem.Piso, piso)
         } else {
           disponible = false;
           ocupado = elem;
@@ -174,23 +169,10 @@ io.on("connection", (socket) => {
       }
     });
 
-    // if (ocupado) {
-    //   console.log("d",ocupado)
-    //   if (ocupado.Piso == piso && ocupado.Zona == zona && ocupado.Posicion == posicion) {
-    //     console.log('Piso', ocupado.Piso, piso)
-    //     console.log('Zona', ocupado.Zona, zona)
-    //     console.log('Posicion', ocupado.Posicion, posicion)
-    //     flag = true;
-    //     ocupado = null;
-    //   }
-    // }
-
-
     if (disponible) {
       const res = DATA.filter(elem => {
         if (posicion == elem.Posicion && zona == elem.Zona && piso == elem.Piso) {
           if (elem.user._id == '' || elem.user._id == user._id) {
-            console.log(elem.user._id, user._id)
             if (elem.user._id == '') {
               elem.sel = !elem.sel;
               elem.user._id = user._id;
@@ -202,9 +184,7 @@ io.on("connection", (socket) => {
               elem.user.auto = '';
               disponible = true;
             }
-            console.log('si')
           } else {
-            console.log('no')
             ocupado = elem.user.auto;
             disponible = false;
           }
@@ -219,7 +199,6 @@ io.on("connection", (socket) => {
         ocupado = null;
       }
     } else {
-      // console.log("[ocupado]", ocupado)
       socket.emit('externo', {status: 'existe', existe: ocupado});
       ocupado = null;
     }
