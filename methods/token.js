@@ -6,4 +6,10 @@ function crearToken(user, secreta, expiresIn){
 		{expiresIn}
 	);
 };
-module.exports = crearToken;
+
+
+function desifraToken(token) {
+	return jwt.decode(token, true);
+}
+
+module.exports = {crearToken, desifraToken};

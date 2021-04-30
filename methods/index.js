@@ -8,5 +8,8 @@ function SelPlace(posicion, zona, piso, DATA) {
     });
     return res;
 };
+//  {Piso: 1, Zona: "A", Posicion: 1, sel: false, user: {_id: '', auto: ''}},
+function exist(posicion, zona, piso, DATA, user) {
 
-module.exports = SelPlace;
+}
+module.exports = {SelPlace, exist};

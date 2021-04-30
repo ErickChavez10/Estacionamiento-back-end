@@ -5,36 +5,40 @@ const cors = require("cors");
 const db = require('./config/db')
 const User = require('./models/user');
 const bcrypt = require('bcryptjs');
-const crearToken = require('./methods/token')
+const {crearToken, desifraToken} = require('./methods/token')
+const {exist} = require('./methods/index')
 const io = require("socket.io")(http, {
   cors: {
     origin: "*",
   },
 });
 db;
+
+
 const DATA = [
-  {Piso: 1, Zona: "A", Posicion: 1, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 2, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 3, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 4, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 5, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 6, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 7, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 8, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 9, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 10, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 11, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 12, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 13, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 14, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 15, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 16, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 17, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 18, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 19, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 20, sel: false},
-  {Piso: 1, Zona: "A", Posicion: 21, sel: false}
+  {Piso: 1, Zona: "A", Posicion: 1, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 2, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 3, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 4, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 5, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 6, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 7, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 8, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 9, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 10, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 11, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 12, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 13, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 14, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 15, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 16, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 17, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 18, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 19, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 20, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: "A", Posicion: 21, sel: false, user: {_id: '', auto: ''}},
 ];
+
 const port = process.env.PORT || 3000;
 
 app.use(cors());
@@ -44,11 +48,13 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/index.html");
 });
 
+app.get("/data", (req, res) => {
+  res.send(DATA)
+});
+
 app.get("/list", (req, res) => {
   res.send(DATA);
 });
-
-
 
 app.get("/users", async (req, res) => {
   const n = await User.find();
@@ -56,6 +62,7 @@ app.get("/users", async (req, res) => {
 });
 
 app.post("/addUser", async (req, res) => {
+
   if (req.body) {
     const {name, auto, email, password, password_confirm} = req.body;
     const user = await User.findOne({email: email});
@@ -79,7 +86,6 @@ app.post("/addUser", async (req, res) => {
           // Le asigna la contraseña encriptada al usuario
           newUser.password = hash;
 
-          console.log('registrado')
           res.send({
             res: {
               status: 'success',
@@ -89,7 +95,6 @@ app.post("/addUser", async (req, res) => {
           })
         } else {
           // MALAS CONTRASEÑAS
-          console.log('no coinciden')
           res.send({
             res: {
               status: 'error',
@@ -99,7 +104,6 @@ app.post("/addUser", async (req, res) => {
         }
       } else {
         // CAMPOS VACIOS
-        console.log('campos vacios')
         res.send({
           res: {
             status: "error",
@@ -111,9 +115,7 @@ app.post("/addUser", async (req, res) => {
   }
 });
 
-
 app.post("/login", async (req, res) => {
-  console.log(req.body);
   const {email, password} = req.body;
   const user = await User.findOne({email})
   if (user) {
@@ -144,7 +146,6 @@ app.post("/login", async (req, res) => {
   }
 })
 
-
 io.on("connection", (socket) => {
   console.log("ALGUIEN SE CONECTÓ");
 
@@ -152,20 +153,79 @@ io.on("connection", (socket) => {
     io.emit("chat message", msg);
   });
 
-  socket.on("Selecciona", (posicion, zona, piso) => {
-    const res = DATA.filter(elem => {
-      if (posicion == elem.Posicion &&
-        zona == elem.Zona && piso == elem.Piso) {
-        elem.sel = !elem.sel;
-        return elem;
+  socket.on("Selecciona", (posicion, zona, piso, token) => {
+    const {user} = desifraToken(token);
+    let disponible = true;
+    let ocupado = null;
+
+    DATA.forEach(elem => {
+      if (elem.user._id == user._id) {
+        if (elem.Posicion == posicion && elem.Zona == zona && elem.Piso == piso) {
+          disponible = true;
+          ocupado = null;
+          console.log("[Mismo Lugar]",);
+          console.log("[Posicion]", elem.Posicion, posicion)
+          console.log("[Zona]", elem.Zona, zona)
+          console.log("[Piso]", elem.Piso, piso)
+        } else {
+          disponible = false;
+          ocupado = elem;
+        }
       }
-      return elem;
     });
-    io.emit("Selecciona", res);
+
+    // if (ocupado) {
+    //   console.log("d",ocupado)
+    //   if (ocupado.Piso == piso && ocupado.Zona == zona && ocupado.Posicion == posicion) {
+    //     console.log('Piso', ocupado.Piso, piso)
+    //     console.log('Zona', ocupado.Zona, zona)
+    //     console.log('Posicion', ocupado.Posicion, posicion)
+    //     flag = true;
+    //     ocupado = null;
+    //   }
+    // }
+
+
+    if (disponible) {
+      const res = DATA.filter(elem => {
+        if (posicion == elem.Posicion && zona == elem.Zona && piso == elem.Piso) {
+          if (elem.user._id == '' || elem.user._id == user._id) {
+            console.log(elem.user._id, user._id)
+            if (elem.user._id == '') {
+              elem.sel = !elem.sel;
+              elem.user._id = user._id;
+              elem.user.auto = user.auto;
+              disponible = true;
+            } else {
+              elem.sel = !elem.sel;
+              elem.user._id = '';
+              elem.user.auto = '';
+              disponible = true;
+            }
+            console.log('si')
+          } else {
+            console.log('no')
+            ocupado = elem.user.auto;
+            disponible = false;
+          }
+          return elem;
+        }
+        return elem;
+      });
+      if (disponible) {
+        io.emit("Selecciona", res);
+      } else {
+        socket.emit('externo', {status: 'ocupado', auto: ocupado});
+        ocupado = null;
+      }
+    } else {
+      // console.log("[ocupado]", ocupado)
+      socket.emit('externo', {status: 'existe', existe: ocupado});
+      ocupado = null;
+    }
   });
 });
 
-// app.use(require('./routes/lista'));
 
 http.listen(port, () => {
   console.log(`Socket.IO server running at http://localhost:${port}/`);
