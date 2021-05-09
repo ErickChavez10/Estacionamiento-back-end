@@ -7,17 +7,13 @@
 </head>
 
 <body>
-  <ul id="messages"></ul>
-  <span id="esc" class="NO">Escribiendo</span>
-  <form id="form" action="">
-    <input id="input" autocomplete="off" /><button>Send</button>
-  </form>
+  <input id="input" autocomplete="off" />
   <h1 id="btn-enviar">Enviar</h1>
   <script src="/socket.io/socket.io.js"></script>
 
   <script>
     var socket = io();
-    
+
     // var form = document.getElementById('form');
     var input = document.getElementById('input');
     var btnEnviar = document.getElementById('btn-enviar');
@@ -26,7 +22,7 @@
     btnEnviar.addEventListener('click', () => {
       socket.emit('mensaje-propio-enviar', input.value);
     });
-    socket.on('mensaje-propio-recibir', (msg)=>{
+    socket.on('mensaje-propio-recibir', (msg) => {
       console.log(msg)
     })
 

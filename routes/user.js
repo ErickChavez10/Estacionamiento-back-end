@@ -7,18 +7,8 @@ const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const {crearToken, desifraToken} = require('../methods/token')
 
-const io = require("socket.io")(http, {
-    cors: {
-        origin: "*",
-    },
-});
 const router = express.Router();
 
-
-router.get("/socket", async (req, res) => {
-    io.emit("test");
-    res.send("SIU")
-})
 router.get("/list", async (req, res) => {
     const n = await User.find();
     res.send(n);
@@ -78,6 +68,36 @@ router.post("/add", async (req, res) => {
     }
 });
 
+router.post("/login", async (req, res) => {
+    const {email, password} = req.body;
+    const user = await User.findOne({email})
+    if (user) {
+        const compare_pass = await bcrypt.compare(password, user.password);
+        if (compare_pass) {
+            res.send({
+                res: {
+                    status: 'success',
+                    token: crearToken(user, 'Secreta', '168hr'),
+                    user: user,
+                }
+            })
+        } else {
+            res.send({
+                res: {
+                    status: 'error',
+                    msg: 'password_not_match'
+                }
+            })
+        }
+    } else {
+        res.send({
+            res: {
+                status: 'error',
+                msg: 'email_not_match'
+            }
+        })
+    }
+})
 
 module.exports = {
     router
