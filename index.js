@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs');
 const {crearToken, desifraToken} = require('./methods/token')
 const {exist} = require('./methods/index');
 // const DATA = require('./data');
-const DATA = const DATA = [
+const DATA = [
   {Piso: 1, Zona: 'A', Posicion: 1, sel: false, user: {_id: '', auto: ''}},
   {Piso: 1, Zona: 'A', Posicion: 2, sel: false, user: {_id: '', auto: ''}},
   {Piso: 1, Zona: 'A', Posicion: 3, sel: false, user: {_id: '', auto: ''}},
