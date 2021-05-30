@@ -6,7 +6,7 @@ const db = require('./config/db')
 const User = require('./models/user');
 const bcrypt = require('bcryptjs');
 const {crearToken, desifraToken} = require('./methods/token')
-const {exist} = require('./methods/index');
+
 // const DATA = require('./data');
 const DATA = [
   {Piso: 1, Zona: 'A', Posicion: 1, sel: false, user: {_id: '', auto: ''}},
@@ -171,6 +171,14 @@ app.post("/addUser", async (req, res) => {
         })
       }
     }
+  } else {
+    // CAMPOS VACIOS
+    res.send({
+      res: {
+        status: "error",
+        msg: 'empty_fields'
+      }
+    })
   }
 });
 
@@ -206,7 +214,7 @@ app.post("/login", async (req, res) => {
 })
 
 io.on("connection", (socket) => {
-  console.log("[Conectado]",socket.id)
+  console.log("[Conectado]", socket.id)
   socket.on("chat message", (msg) => {
     io.emit("chat message", msg);
   });
