@@ -250,6 +250,7 @@ io.on("connection", (socket) => {
               elem.user._id = '';
               elem.user.auto = '';
               disponible = true;
+              console.log('libera')
             }
           } else {
             ocupado = elem.user.auto;
