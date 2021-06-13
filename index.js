@@ -4,91 +4,38 @@ const http = require("http").Server(app);
 const cors = require("cors");
 const db = require('./config/db')
 const User = require('./models/user');
+const Parking = require('./models/estacionamiento');
 const bcrypt = require('bcryptjs');
-const {crearToken, desifraToken} = require('./methods/token')
+const {crearToken, desifraToken} = require('./methods/token');
+const {liberarEspacio} = require("./methods");
 
 // const DATA = require('./data');
 const DATA = [
-  {Piso: 1, Zona: 'A', Posicion: 1, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 2, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 3, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 4, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 5, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 6, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 7, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 8, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 9, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 10, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 11, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 12, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 13, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 14, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 15, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 16, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 17, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 18, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 19, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'A', Posicion: 20, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 1, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 2, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 3, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 4, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 5, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 6, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 7, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 8, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 9, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 10, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 11, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 12, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 13, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 14, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 15, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 16, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 17, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 18, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 19, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'B', Posicion: 20, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 1, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 2, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 3, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 4, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 5, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 6, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 7, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 8, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 9, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 10, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 11, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 12, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 13, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 14, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 15, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 16, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 17, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 18, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 19, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'C', Posicion: 20, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 1, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 2, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 3, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 4, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 5, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 6, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 7, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 8, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 9, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 10, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 11, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 12, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 13, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 14, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 15, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 16, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 17, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 18, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 19, sel: false, user: {_id: '', auto: ''}},
-  {Piso: 1, Zona: 'D', Posicion: 20, sel: false, user: {_id: '', auto: ''}},
+  {Piso: 1, Zona: 'A', Posicion: 1, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 2, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 3, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 4, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 5, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 6, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 7, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 8, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 9, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 10, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 11, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 12, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 13, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 14, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 15, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'A', Posicion: 16, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'B', Posicion: 1, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'B', Posicion: 2, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'B', Posicion: 3, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'B', Posicion: 4, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'B', Posicion: 5, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'B', Posicion: 6, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'B', Posicion: 7, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'B', Posicion: 8, sel: false, user: {_id: '', auto: '', timeStart:null} },
+    {Piso: 1, Zona: 'B', Posicion: 9, sel: false, user: {_id: '', auto: '', timeStart:null} },
 ];
 
 const io = require("socket.io")(http, {
@@ -105,6 +52,10 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/index.html");
+});
+app.get("/parking", async (req, res) => {
+  const response = await Parking.find()
+  res.send(response)
 });
 
 app.get("/data", (req, res) => {
@@ -144,13 +95,15 @@ app.post("/addUser", async (req, res) => {
           const hash = await bcrypt.hash(password, 10);
           // Le asigna la contraseña encriptada al usuario
           newUser.password = hash;
-
+          await newUser.save();
+          const userRes = await User.findOne({email: req.body.email});
           res.send({
             res: {
               status: 'success',
+              msg: "success"
             },
-            user: await newUser.save(),
-            token: crearToken(user, 'Secreta', '168hr')
+            user: userRes,
+            token: crearToken(userRes, 'Secreta', '168hr')
           })
         } else {
           // MALAS CONTRASEÑAS
@@ -244,15 +197,25 @@ io.on("connection", (socket) => {
               elem.sel = !elem.sel;
               elem.user._id = user._id;
               elem.user.auto = user.auto;
-              disponible = true;
+              elem.user.timeStart = Date.now();
+              disponible = true
+              
+              console.log("OCUPAR")
+
+              const newParking = new Parking({name:user.name, email:user.email, auto: user.auto, timeStart: Date.now()})
+              newParking.save();
             } else {
+              console.log("Salir")
+              liberarEspacio(user.email, elem.user.timeStart);
+
               elem.sel = !elem.sel;
               elem.user._id = '';
               elem.user.auto = '';
               disponible = true;
-              console.log('libera')
             }
           } else {
+            console.log("OCUPADO POR ALGUIEN MAS")
+            
             ocupado = elem.user.auto;
             disponible = false;
           }

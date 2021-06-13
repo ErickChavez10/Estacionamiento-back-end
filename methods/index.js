@@ -12,4 +12,11 @@ function SelPlace(posicion, zona, piso, DATA) {
 function exist(posicion, zona, piso, DATA, user) {
 
 }
-module.exports = {SelPlace, exist};
+const Parking = require('../models/estacionamiento')
+async function liberarEspacio(email, timeStart){
+    console.log(email)
+    const n = await Parking.findOne({email, timeEnd: null});
+    await Parking.findByIdAndUpdate(n._id, {timeEnd: Date.now()})
+    console.log(n)
+}
+module.exports = {SelPlace, exist, liberarEspacio};
